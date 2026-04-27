@@ -7,12 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BOLTX</title>
 
-  <!-- تنسيقات الموقع -->
+  <!-- CSS -->
   <style>
     body {
       margin: 0;
       background: black;
-      color: #b000ff; 
+      color: #b000ff;
       font-family: Arial;
     }
 
@@ -35,19 +35,22 @@
     .posts {
       flex: 1;
       min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .post {
-   width: 100%;
-   max-width: 500px;
-   border: 1px solid #b000ff;
-   padding: 15px;
-   border-radius: 15px;
-   margin-bottom: 20px;
-   background: #111;
-   box-sizing: border-box;
-   word-wrap: break-word;
- }
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid #b000ff;
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      background: #111;
+      box-sizing: border-box;
+      word-wrap: break-word;
+    }
 
     .chat {
       width: 360px;
@@ -82,6 +85,7 @@
       background: black;
       color: #b000ff;
       border: 1px solid #b000ff;
+      box-sizing: border-box;
     }
 
     button {
@@ -110,19 +114,16 @@
   <!-- HEADER -->
   <div class="header">
 
-    <!-- LOGO -->
     <div style="display:flex;align-items:center;gap:10px;">
-      <img src="Logo.png" width="50">
+      <img src="logo.png" width="50">
       <h2>BOLTX</h2>
     </div>
 
-    <!-- NEW POST BUTTON -->
     <div onclick="checkPassword()" style="cursor:pointer;text-align:center;">
       <div style="font-size:35px;">+</div>
       <div>New Post</div>
     </div>
 
-    <!-- USER AREA -->
     <div id="userArea">
       <a href="Login.html">
         <img src="Signin.png" width="60">
@@ -131,32 +132,26 @@
 
   </div>
 
-  <!-- LINE -->
   <hr style="border:1px solid #b000ff;">
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <div class="main">
 
-    <!-- POSTS SECTION -->
+    <!-- POSTS -->
     <div class="posts">
       <h2>New</h2>
       <div id="posts"></div>
     </div>
 
-    <!-- CHAT SECTION -->
+    <!-- CHAT -->
     <div class="chat">
-
       <h3 style="text-align:center;">Live Chat</h3>
-
-      <!-- CHAT MESSAGES -->
       <div id="chatMessages" style="flex:1;overflow-y:auto;margin-bottom:10px;"></div>
 
-      <!-- CHAT INPUT -->
       <div style="display:flex;gap:10px;">
         <input id="chatInput" placeholder="Send message...">
         <button onclick="sendMessage()">Send</button>
       </div>
-
     </div>
 
   </div>
@@ -175,10 +170,8 @@
     <button onclick="addPost()">POST</button>
   </div>
 
-  <!-- JAVASCRIPT -->
+  <!-- SCRIPT -->
   <script>
-
-    /* USER LOGIN STATUS */
     let nickname = localStorage.getItem("nickname");
 
     if (nickname) {
@@ -187,13 +180,11 @@
         "<br><small onclick='logout()' style='cursor:pointer;'>Logout</small></div>";
     }
 
-    /* LOGOUT FUNCTION */
     function logout() {
       localStorage.removeItem("nickname");
       location.reload();
     }
 
-    /* CHECK PASSWORD FOR NEW POST */
     function checkPassword() {
       let password = prompt("Enter Password:");
       if (password === "2626101020112011boltx") {
@@ -201,30 +192,42 @@
       }
     }
 
-    /* LOAD POSTS */
     function loadPosts() {
       let posts = JSON.parse(localStorage.getItem("posts")) || [];
       let box = document.getElementById("posts");
-
       box.innerHTML = "";
 
       posts.forEach((post, index) => {
-        box.innerHTML += `
-          <div class="post">
-            <div>${post.text}</div>
+        let ownerButtons = "";
 
-            ${post.image ? `<img src="${post.image}" style="max-width:100%;margin-top:10px;border-radius:10px;">` : ''}
-
+        if (post.owner === nickname) {
+          ownerButtons = `
             <div style="margin-top:10px;">
               <button onclick="editPost(${index})">Edit</button>
               <button onclick="deletePost(${index})" style="background:red;">Delete</button>
             </div>
+          `;
+        }
+
+        box.innerHTML += `
+          <div class="post">
+            <div><b>${post.owner}</b></div>
+            <div style="margin-top:8px;">${post.text}</div>
+
+            ${post.image ? `
+              <img src="${post.image}" style="
+                width:100%;
+                margin-top:10px;
+                border-radius:10px;
+              ">
+            ` : ""}
+
+            ${ownerButtons}
           </div>
         `;
       });
     }
 
-    /* ADD POST */
     function addPost() {
       let text = document.getElementById("postText").value;
       let file = document.getElementById("postImage").files[0];
@@ -232,21 +235,20 @@
 
       if (file) {
         let reader = new FileReader();
-
-        reader.onload = function (e) {
+        reader.onload = function(e) {
           posts.unshift({
+            owner: nickname,
             text: text,
             image: e.target.result
           });
 
           localStorage.setItem("posts", JSON.stringify(posts));
           loadPosts();
-        }
-
+        };
         reader.readAsDataURL(file);
-
       } else {
         posts.unshift({
+          owner: nickname,
           text: text,
           image: ""
         });
@@ -260,7 +262,6 @@
       document.getElementById("postBox").style.display = "none";
     }
 
-    /* EDIT POST */
     function editPost(index) {
       let posts = JSON.parse(localStorage.getItem("posts")) || [];
       let newText = prompt("Edit post:", posts[index].text);
@@ -272,7 +273,6 @@
       }
     }
 
-    /* DELETE POST */
     function deletePost(index) {
       let posts = JSON.parse(localStorage.getItem("posts")) || [];
       posts.splice(index, 1);
@@ -280,29 +280,25 @@
       loadPosts();
     }
 
-    /* LOAD CHAT */
     function loadChat() {
       let messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
       let box = document.getElementById("chatMessages");
-
       box.innerHTML = "";
 
-      messages.forEach((msg, index) => {
+      messages.forEach((msg) => {
         let mine = msg.name === nickname;
 
         box.innerHTML += `
-          <div style="display:flex;justify-content:${mine ? 'flex-end' : 'flex-start'};margin-bottom:10px;">
-            <div style="background:${mine ? '#b000ff' : '#222'};padding:10px;border-radius:10px;color:white;max-width:70%;">
+          <div style="display:flex;justify-content:${mine ? "flex-end" : "flex-start"};margin-bottom:10px;">
+            <div style="background:${mine ? "#b000ff" : "#222"};padding:10px;border-radius:10px;color:white;max-width:70%;">
               <div><b>${msg.name}</b></div>
               <div>${msg.text}</div>
-              ${mine ? `<small onclick="deleteMessage(${index})" style="cursor:pointer;color:#ffcccc;">Delete</small>` : ''}
             </div>
           </div>
         `;
       });
     }
 
-    /* SEND MESSAGE */
     function sendMessage() {
       if (!nickname) {
         alert("Login first");
@@ -322,18 +318,8 @@
       loadChat();
     }
 
-    /* DELETE MESSAGE */
-    function deleteMessage(index) {
-      let messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
-      messages.splice(index, 1);
-      localStorage.setItem("chatMessages", JSON.stringify(messages));
-      loadChat();
-    }
-
-    /* INITIAL LOAD */
     loadPosts();
     loadChat();
-
   </script>
 
 </body>
