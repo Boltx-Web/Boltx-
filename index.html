@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOLTX</title>
+</head>
+
+<body style="margin:0; background:black; color:#b000ff; font-family:Arial;">
+
+  <!-- HEADER -->
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:20px; font-size:30px;">
+
+    <!-- LOGO -->
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img src="Logo & Icon/Logo.png" width="50">
+      <b>BOLTX</b>
+    </div>
+
+    <!-- NEW POST -->
+    <div style="text-align:center; cursor:pointer;" onclick="checkPassword()">
+      <div style="font-size:40px;">+</div>
+      <div>New Post</div>
+    </div>
+
+    <!-- USER AREA -->
+    <div id="userArea">
+      <a href="Login.html">
+        <img src="Logo & Icon/Signin.png" width="60">
+      </a>
+    </div>
+  </div>
+
+  <hr style="border:2px solid #b000ff; margin:0;">
+
+  <!-- MAIN CONTENT -->
+  <div style="display:flex; justify-content:space-between; padding:20px;">
+
+    <!-- POSTS -->
+    <div style="width:45%;">
+      <h1>New</h1>
+
+      <div id="posts"></div>
+
+      <div style="display:flex; justify-content:space-between; font-size:18px; margin-top:10px;">
+        <span id="date"></span>
+
+        <span style="cursor:pointer;" onclick="addLike()">
+          <span id="heart">♡</span> <span id="likes">0</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div style="
+      width:360px;
+      height:560px;
+      border:2px solid #b000ff;
+      border-radius:20px;
+      padding:15px;
+      display:flex;
+      flex-direction:column;
+      background:#0a0a0a;
+      box-shadow:0 0 15px #b000ff33;
+    ">
+
+      <h3 style="text-align:center; margin-top:0;">Live Chat</h3>
+
+      <div id="chatMessages" style="
+        flex:1;
+        overflow-y:auto;
+        padding:10px;
+        margin-bottom:10px;
+        background:black;
+        border-radius:10px;
+      "></div>
+
+      <div style="display:flex; gap:10px;">
+        <input id="chatInput" placeholder="Send a message..."
+          style="flex:1; padding:12px; background:#111; color:#b000ff; border:1px solid #b000ff; border-radius:10px; outline:none;">
+
+        <button onclick="sendMessage()"
+          style="padding:12px 18px; background:#b000ff; color:white; border:none; border-radius:10px; cursor:pointer;">
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST BOX -->
+  <div id="postBox" style="display:none; padding:20px;">
+    <textarea id="postText" placeholder="اكتب المنشور هنا"
+      style="width:100%; height:100px; font-size:20px;"></textarea>
+    <br><br>
+    <input type="file" id="postImage" accept="image/*">
+    <br><br>
+    <button onclick="addPost()" style="padding:10px 20px; font-size:18px;">POST</button>
+  </div>
+
+  <script>
+    // Likes
+    let likes = localStorage.getItem("likes") || 0;
+    let liked = localStorage.getItem("liked") === "true";
+    document.getElementById("likes").innerText = likes;
+    if (liked) document.getElementById("heart").style.color = "red";
+
+    function addLike() {
+      if (!liked) {
+        likes++;
+        liked = true;
+        localStorage.setItem("likes", likes);
+        localStorage.setItem("liked", "true");
+        document.getElementById("likes").innerText = likes;
+        document.getElementById("heart").style.color = "red";
+      }
+    }
+
+    // Password
+    function checkPassword() {
+      let password = prompt("Enter Password:");
+      if (password === "2626101020112011boltx") {
+        document.getElementById("postBox").style.display = "block";
+      } else {
+        alert("Wrong Password");
+      }
+    }
+
+    // POSTS
+    function loadPosts() {
+      let posts = JSON.parse(localStorage.getItem("posts")) || [];
+      let postsBox = document.getElementById("posts");
+      postsBox.innerHTML = "";
+
+      posts.forEach((post, index) => {
+        postsBox.innerHTML += `
+          <div style="border:1px solid #b000ff; padding:10px; margin-bottom:15px; border-radius:10px;">
+            <div style="margin-bottom:10px;">${post.text}</div>
+
+            ${post.image ? `<img src="${post.image}" style="max-width:100%; border-radius:10px; margin-bottom:10px;">` : ""}
+
+            <button onclick="editPost(${index})"
+              style="padding:5px 10px; margin-right:5px; background:#b000ff; color:white; border:none; border-radius:5px;">
+              Edit
+            </button>
+
+            <button onclick="deletePost(${index})"
+              style="padding:5px 10px; background:red; color:white; border:none; border-radius:5px;">
+              Delete
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function addPost() {
+      let text = document.getElementById("postText").value;
+      let file = document.getElementById("postImage").files[0];
+
+      if (!text.trim() && !file) return;
+
+      let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+      if (file) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+          posts.unshift({
+            text: text,
+            image: e.target.result
+          });
+
+          localStorage.setItem("posts", JSON.stringify(posts));
+          loadPosts();
+          document.getElementById("postText").value = "";
+          document.getElementById("postImage").value = "";
+          document.getElementById("postBox").style.display = "none";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        posts.unshift({
+          text: text,
+          image: ""
+        });
+
+        localStorage.setItem("posts", JSON.stringify(posts));
+        loadPosts();
+        document.getElementById("postText").value = "";
+        document.getElementById("postBox").style.display = "none";
+      }
+    }
+
+    function deletePost(index) {
+      let posts = JSON.parse(localStorage.getItem("posts")) || [];
+      posts.splice(index, 1);
+      localStorage.setItem("posts", JSON.stringify(posts));
+      loadPosts();
+    }
+
+    function editPost(index) {
+      let posts = JSON.parse(localStorage.getItem("posts")) || [];
+      let newText = prompt("Edit post:", posts[index].text);
+
+      if (newText !== null) {
+        posts[index].text = newText;
+        localStorage.setItem("posts", JSON.stringify(posts));
+        loadPosts();
+      }
+    }
+
+    loadPosts();
+
+    // Date
+    let today = new Date();
+    document.getElementById("date").innerText =
+      "Date: " +
+      today.getDate().toString().padStart(2,'0') + "/" +
+      (today.getMonth()+1).toString().padStart(2,'0') + "/" +
+      today.getFullYear();
+
+    // User
+    let nickname = localStorage.getItem("nickname");
+    if (nickname) {
+      document.getElementById("userArea").innerHTML =
+        "<div style='text-align:center;'>" +
+        "<div style='font-size:22px; font-weight:bold; color:#b000ff;'>" +
+        nickname +
+        "</div>" +
+        "<div onclick='logout()' style='font-size:12px; cursor:pointer;'>Logout</div>" +
+        "</div>";
+    }
+
+    function logout() {
+      localStorage.removeItem("nickname");
+      location.reload();
+    }
+
+    // Chat
+    function loadChat() {
+      let messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
+      let chatBox = document.getElementById("chatMessages");
+      let nickname = localStorage.getItem("nickname");
+
+      chatBox.innerHTML = "";
+
+      messages.forEach(msg => {
+        let mine = msg.name === nickname;
+
+        chatBox.innerHTML += `
+          <div style="display:flex; justify-content:${mine ? "flex-end" : "flex-start"}; margin-bottom:10px;">
+            <div style="background:${mine ? "#b000ff" : "#111"}; color:white; padding:10px; border-radius:12px; max-width:75%;">
+              <div style="font-weight:bold; color:${mine ? "white" : "#b000ff"};">${msg.name}</div>
+              <div>${msg.text}</div>
+              <div style="font-size:10px; margin-top:4px; opacity:0.8;">${msg.time}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function sendMessage() {
+      let nickname = localStorage.getItem("nickname");
+      let text = document.getElementById("chatInput").value;
+      if (!nickname || !text.trim()) return;
+
+      let messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
+
+      messages.push({
+        name: nickname,
+        text: text,
+        time: new Date().toLocaleString()
+      });
+
+      localStorage.setItem("chatMessages", JSON.stringify(messages));
+      document.getElementById("chatInput").value = "";
+      loadChat();
+    }
+
+    loadChat();
+    localStorage.removeItem("users");
+  </script>
+  <!-- FOOTER -->
+<div style="
+  margin-top:40px;
+  padding:20px;
+  text-align:center;
+  border-top:2px solid #b000ff;
+  background:#0a0a0a;
+">
+
+  <a href="about.html" style="
+    margin:10px;
+    color:#b000ff;
+    text-decoration:none;
+    font-size:18px;
+  ">About</a>
+
+  <a href="privacy.html" style="
+    margin:10px;
+    color:#b000ff;
+    text-decoration:none;
+    font-size:18px;
+  ">Privacy Policy</a>
+
+  <a href="contact.html" style="
+    margin:10px;
+    color:#b000ff;
+    text-decoration:none;
+    font-size:18px;
+  ">Contact</a>
+
+</div>
+</body>
+</html>

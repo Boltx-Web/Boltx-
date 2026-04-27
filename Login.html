@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - BOLTX</title>
+</head>
+
+<body style="
+  margin:0;
+  background:black;
+  color:#b000ff;
+  font-family:Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+">
+
+  <div style="
+    width:350px;
+    padding:20px;
+    border:2px solid #b000ff;
+    border-radius:15px;
+    box-shadow:0 0 15px #b000ff33;
+    background:#111;
+  ">
+
+    <h2 style="text-align:center;">BOLTX Login</h2>
+
+    <input id="nickname" placeholder="Nickname"
+      style="width:100%; padding:10px; margin-bottom:10px; background:black; color:#b000ff; border:1px solid #b000ff;">
+
+    <input id="email" type="email" placeholder="Email"
+      style="width:100%; padding:10px; margin-bottom:10px; background:black; color:#b000ff; border:1px solid #b000ff;">
+
+    <input id="phone" placeholder="Phone Number"
+      style="width:100%; padding:10px; margin-bottom:10px; background:black; color:#b000ff; border:1px solid #b000ff;">
+
+    <input id="password" type="password" placeholder="Password"
+      style="width:100%; padding:10px; margin-bottom:15px; background:black; color:#b000ff; border:1px solid #b000ff;">
+
+    <button onclick="signUp()" style="
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+      background:#b000ff;
+      color:white;
+      border:none;
+      cursor:pointer;
+    ">
+      Sign Up
+    </button>
+
+    <button onclick="login()" style="
+      width:100%;
+      padding:10px;
+      background:black;
+      color:#b000ff;
+      border:1px solid #b000ff;
+      cursor:pointer;
+    ">
+      Login
+    </button>
+
+  </div>
+
+  <script>
+    function signUp() {
+      let nickname = document.getElementById("nickname").value;
+      let email = document.getElementById("email").value;
+      let phone = document.getElementById("phone").value;
+      let password = document.getElementById("password").value;
+
+      if (!nickname || !email || !phone || !password) {
+        alert("املأ كل البيانات");
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+
+      // منع تكرار الإيميل
+      let existingUser = users.find(user => user.email === email);
+
+      if (existingUser) {
+        alert("هذا الإيميل مسجل بالفعل");
+        return;
+      }
+
+      users.push({
+        nickname: nickname,
+        email: email,
+        phone: phone,
+        password: password
+      });
+
+      localStorage.setItem("users", JSON.stringify(users));
+
+      alert("تم إنشاء الحساب بنجاح");
+    }
+
+    function login() {
+      let email = document.getElementById("email").value;
+      let password = document.getElementById("password").value;
+
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+
+      let user = users.find(user =>
+        user.email === email && user.password === password
+      );
+
+      if (user) {
+        localStorage.setItem("nickname", user.nickname);
+        window.location.href = "index.html";
+      } else {
+        alert("بيانات الدخول غير صحيحة");
+      }
+    }
+  </script>
+
+</body>
+</html>
