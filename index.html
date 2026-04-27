@@ -7,15 +7,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BOLTX</title>
 
-  <!-- CSS -->
+  <!-- تنسيقات الموقع -->
   <style>
     body {
       margin: 0;
       background: black;
       color: #b000ff;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
     }
 
+    /* HEADER */
     .header {
       display: flex;
       justify-content: space-between;
@@ -25,33 +26,52 @@
       padding: 20px;
     }
 
+    /* MAIN LAYOUT */
     .main {
       display: flex;
-      gap: 20px;
+      justify-content: center;
+      gap: 25px;
       padding: 20px;
       flex-wrap: wrap;
+      align-items: flex-start;
     }
 
+    /* POSTS AREA */
     .posts {
-      flex: 1;
-      min-width: 280px;
+      width: 100%;
+      max-width: 550px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
+    /* SINGLE POST */
     .post {
       width: 100%;
-      max-width: 500px;
-      border: 1px solid #b000ff;
-      padding: 15px;
-      border-radius: 15px;
-      margin-bottom: 20px;
       background: #111;
+      border: 1px solid #b000ff;
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 20px;
       box-sizing: border-box;
-      word-wrap: break-word;
+      box-shadow: 0 0 10px rgba(176, 0, 255, 0.2);
     }
 
+    /* POST IMAGE */
+    .post img {
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 10px;
+    }
+
+    /* POST BUTTONS */
+    .post-buttons {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+    }
+
+    /* CHAT BOX */
     .chat {
       width: 360px;
       max-width: 100%;
@@ -62,21 +82,24 @@
       display: flex;
       flex-direction: column;
       background: #111;
+      box-sizing: border-box;
     }
 
+    /* FOOTER */
     .footer {
       margin-top: 30px;
       padding: 20px;
       text-align: center;
-      border-top: 2px solid #b000ff;
+      border-top: 1px solid #b000ff;
     }
 
     .footer a {
-      margin: 10px;
       color: #b000ff;
+      margin: 10px;
       text-decoration: none;
     }
 
+    /* INPUTS */
     input,
     textarea {
       width: 100%;
@@ -85,9 +108,11 @@
       background: black;
       color: #b000ff;
       border: 1px solid #b000ff;
+      border-radius: 5px;
       box-sizing: border-box;
     }
 
+    /* BUTTONS */
     button {
       padding: 8px 15px;
       background: #b000ff;
@@ -97,13 +122,16 @@
       cursor: pointer;
     }
 
+    /* MOBILE */
     @media(max-width:768px) {
       .main {
         flex-direction: column;
+        align-items: center;
       }
 
       .chat {
         width: 100%;
+        max-width: 550px;
       }
     }
   </style>
@@ -114,19 +142,22 @@
   <!-- HEADER -->
   <div class="header">
 
+    <!-- LOGO -->
     <div style="display:flex;align-items:center;gap:10px;">
       <img src="logo.png" width="50">
       <h2>BOLTX</h2>
     </div>
 
+    <!-- NEW POST -->
     <div onclick="checkPassword()" style="cursor:pointer;text-align:center;">
       <div style="font-size:35px;">+</div>
       <div>New Post</div>
     </div>
 
+    <!-- USER AREA -->
     <div id="userArea">
-      <a href="Login.html">
-        <img src="Signin.png" width="60">
+      <a href="login.html">
+        <img src="sticker.png" width="60">
       </a>
     </div>
 
@@ -137,15 +168,16 @@
   <!-- MAIN -->
   <div class="main">
 
-    <!-- POSTS -->
+    <!-- POSTS SECTION -->
     <div class="posts">
       <h2>New</h2>
       <div id="posts"></div>
     </div>
 
-    <!-- CHAT -->
+    <!-- CHAT SECTION -->
     <div class="chat">
       <h3 style="text-align:center;">Live Chat</h3>
+
       <div id="chatMessages" style="flex:1;overflow-y:auto;margin-bottom:10px;"></div>
 
       <div style="display:flex;gap:10px;">
@@ -164,7 +196,7 @@
   </div>
 
   <!-- POST BOX -->
-  <div id="postBox" style="display:none;padding:20px;">
+  <div id="postBox" style="display:none;max-width:550px;margin:20px auto;padding:20px;">
     <textarea id="postText" placeholder="Write post..."></textarea>
     <input type="file" id="postImage" accept="image/*">
     <button onclick="addPost()">POST</button>
@@ -174,6 +206,7 @@
   <script>
     let nickname = localStorage.getItem("nickname");
 
+    // USER DISPLAY
     if (nickname) {
       document.getElementById("userArea").innerHTML =
         "<div>" + nickname +
@@ -185,6 +218,7 @@
       location.reload();
     }
 
+    // NEW POST PASSWORD
     function checkPassword() {
       let password = prompt("Enter Password:");
       if (password === "2626101020112011boltx") {
@@ -192,17 +226,19 @@
       }
     }
 
+    // LOAD POSTS
     function loadPosts() {
       let posts = JSON.parse(localStorage.getItem("posts")) || [];
       let box = document.getElementById("posts");
       box.innerHTML = "";
 
       posts.forEach((post, index) => {
+
         let ownerButtons = "";
 
         if (post.owner === nickname) {
           ownerButtons = `
-            <div style="margin-top:10px;">
+            <div class="post-buttons">
               <button onclick="editPost(${index})">Edit</button>
               <button onclick="deletePost(${index})" style="background:red;">Delete</button>
             </div>
@@ -213,21 +249,14 @@
           <div class="post">
             <div><b>${post.owner}</b></div>
             <div style="margin-top:8px;">${post.text}</div>
-
-            ${post.image ? `
-              <img src="${post.image}" style="
-                width:100%;
-                margin-top:10px;
-                border-radius:10px;
-              ">
-            ` : ""}
-
+            ${post.image ? `<img src="${post.image}">` : ""}
             ${ownerButtons}
           </div>
         `;
       });
     }
 
+    // ADD POST
     function addPost() {
       let text = document.getElementById("postText").value;
       let file = document.getElementById("postImage").files[0];
@@ -241,7 +270,6 @@
             text: text,
             image: e.target.result
           });
-
           localStorage.setItem("posts", JSON.stringify(posts));
           loadPosts();
         };
@@ -252,7 +280,6 @@
           text: text,
           image: ""
         });
-
         localStorage.setItem("posts", JSON.stringify(posts));
         loadPosts();
       }
@@ -262,6 +289,7 @@
       document.getElementById("postBox").style.display = "none";
     }
 
+    // EDIT POST
     function editPost(index) {
       let posts = JSON.parse(localStorage.getItem("posts")) || [];
       let newText = prompt("Edit post:", posts[index].text);
@@ -273,6 +301,7 @@
       }
     }
 
+    // DELETE POST
     function deletePost(index) {
       let posts = JSON.parse(localStorage.getItem("posts")) || [];
       posts.splice(index, 1);
@@ -280,25 +309,27 @@
       loadPosts();
     }
 
+    // LOAD CHAT
     function loadChat() {
       let messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
       let box = document.getElementById("chatMessages");
       box.innerHTML = "";
 
-      messages.forEach((msg) => {
+      messages.forEach(msg => {
         let mine = msg.name === nickname;
 
         box.innerHTML += `
           <div style="display:flex;justify-content:${mine ? "flex-end" : "flex-start"};margin-bottom:10px;">
             <div style="background:${mine ? "#b000ff" : "#222"};padding:10px;border-radius:10px;color:white;max-width:70%;">
-              <div><b>${msg.name}</b></div>
-              <div>${msg.text}</div>
+              <b>${msg.name}</b><br>
+              ${msg.text}
             </div>
           </div>
         `;
       });
     }
 
+    // SEND CHAT MESSAGE
     function sendMessage() {
       if (!nickname) {
         alert("Login first");
